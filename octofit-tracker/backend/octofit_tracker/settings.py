@@ -139,7 +139,31 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True
+if DEBUG:
+    # In development, allow all origins for easier local testing
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGINS = []
+else:
+    # In production, restrict CORS to known frontend origins
+    CORS_ALLOW_ALL_ORIGINS = False
+
+    # Optional explicit frontend origin from environment
+    FRONTEND_ORIGIN = os.environ.get('FRONTEND_ORIGIN')
+
+    CORS_ALLOWED_ORIGINS = []
+
+    if FRONTEND_ORIGIN:
+        CORS_ALLOWED_ORIGINS.append(FRONTEND_ORIGIN)
+
+    # Local React dev server
+    CORS_ALLOWED_ORIGINS.extend([
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+    ])
+
+    # GitHub Codespaces frontend URL on port 3000, if applicable
+    if CODESPACE_NAME:
+        CORS_ALLOWED_ORIGINS.append(f'https://{CODESPACE_NAME}-3000.app.github.dev')
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ['*']
 CORS_ALLOW_METHODS = ['*']
